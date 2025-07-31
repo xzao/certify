@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+#   certify
+#
+
+
+#
+#   default[s]
+#
+[[ -z "$CERTIFY_ETC" ]] && CERTIFY_ETC="/etc/certify"
+
+
+#
+#   check[s]
+#
+[[ -z "$CERTIFY_CLOUDFLARE_API_TOKEN" ]] && echo "Error: CERTIFY_CLOUDFLARE_API_TOKEN environment variable is not set." && exit 1
+[[ -z "$CERTIFY_DOMAINS" ]] && echo "Error: CERTIFY_DOMAINS environment variable is not set." && exit 1
+[[ -z "$CERTIFY_EMAIL" ]] && echo "Error: CERTIFY_EMAIL environment variable is not set." && exit 1
+[[ -z "$CERTIFY_ETC" ]] && echo "Error: CERTIFY_ETC environment variable is not set." && exit 1
+
+
+#
+#   prepare arg[s] domains
+#
+IFS=',' read -r -a domain_array <<< "$CERTIFY_DOMAINS"
+args=()
+for domain in "${domain_array[@]}"; do
+  args+=("-d" "$domain")
+done
+
+
+#
+#   prepare dir[s]
+#
+mkdir -p "${CERTIFY_ETC}"
+mkdir -p "${CERTIFY_ETC}/credentials"
+mkdir -p "${CERTIFY_ETC}/credentials/cloudflare"
+mkdir -p "${CERTIFY_ETC}/letsencrypt"
+mkdir -p "${CERTIFY_ETC}/letsencrypt/cloudflare"
+
+
+#
+#   prepare credential[s]
+#
+echo "dns_cloudflare_api_token = $CERTIFY_CLOUDFLARE_API_TOKEN" > "${CERTIFY_ETC}/cloudflare/cloudflare.ini"
+chmod 600 "${CERTIFY_ETC}/cloudflare/cloudflare.ini"
+
+
+#
+#   certbot
+#
+set -x
+certbot certonly \
+  --config-dir "${CERTIFY_ETC}/letsencrypt" \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials "${CERTIFY_ETC}/cloudflare/cloudflare.ini" \
+  --email "$CERTIFY_EMAIL" \
+  --agree-tos \
+  --non-interactive \
+  "${args[@]}"
