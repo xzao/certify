@@ -34,6 +34,8 @@ renew:
 	@docker exec -it --env-file .env services-certify certbot --config-dir "${CERTIFY_ETC}/letsencrypt" renew
 
 reset:
+	@make list
+	@echo
 	@read -p "Remove all files and folders at ${CERTIFY_ETC}/letsencrypt? [y/N] " ans && [ "$$ans" = "y" ] && echo "Confirmed." || (echo "Cancelled."; exit 1)
 	@docker exec -it --env-file .env services-certify rm -rf "${CERTIFY_ETC}/letsencrypt"
 
