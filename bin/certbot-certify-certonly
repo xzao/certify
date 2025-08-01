@@ -50,7 +50,7 @@ chmod 600 "${CERTIFY_ETC}/cloudflare/cloudflare.ini"
 #   certbot
 #
 set -x
-certbot certonly \
+certbot -v certonly \
   --config-dir "${CERTIFY_ETC}/letsencrypt" \
   --dns-cloudflare \
   --dns-cloudflare-credentials "${CERTIFY_ETC}/cloudflare/cloudflare.ini" \
