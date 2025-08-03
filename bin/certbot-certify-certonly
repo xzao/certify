@@ -57,4 +57,5 @@ certbot -v certonly \
   --email "$CERTIFY_EMAIL" \
   --agree-tos \
   --non-interactive \
+  --force-renewal \
   "${args[@]}"
