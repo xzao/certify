@@ -30,22 +30,7 @@ certify:
 delete:
 	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certbot --config-dir "${CERTIFY_ETC}/letsencrypt" delete --cert-name "$(CERTIFY_CERT_NAME)"
 
-expand:
-	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certbot -v certonly \
-  	  --config-dir "${CERTIFY_ETC}/letsencrypt" \
-  	  --dns-cloudflare \
-  	  --dns-cloudflare-credentials "${CERTIFY_ETC}/cloudflare/cloudflare.ini" \
-  	  --email "${CERTIFY_EMAIL}" \
-  	  --agree-tos \
-  	  --dns-cloudflare-propagation-seconds 30 \
-  	  --non-interactive \
-  	  --force-renewal \
-	  --cert-name "$(CERTIFY_CERT_NAME)" \
-  	  --expand \
-  	  -d "${CERTIFY_DOMAINS}"
-
-certify:
-	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certify
+expand: certify
 
 issue: certify
 
@@ -65,8 +50,8 @@ reset:
 	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) rm -rf "${CERTIFY_ETC}/letsencrypt"
 
 restart:
-	make stop
-	make start
+	@make stop
+	@make start
 
 shell:
 	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) bash

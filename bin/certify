@@ -19,7 +19,7 @@
 
 
 #
-#   prepare arg[s] domains (from .dns file and/or CERTIFY_DOMAINS env)
+#   prepare arg[s] domains [from env and/or file]
 #
 declare -A domain_set
 domains=()
@@ -78,16 +78,43 @@ chmod 600 "${CERTIFY_ETC}/cloudflare/cloudflare.ini"
 
 
 #
-#   certbot
+#   cert name [for --cert-name; default first domain]
+#
+cert_name="${CERTIFY_CERT_NAME:-${domains[0]}}"
+
+
+#
+#   certbot [issue if cert missing, expand if cert exists]
 #
 set -x
-certbot -v certonly \
-  --config-dir "${CERTIFY_ETC}/letsencrypt" \
-  --dns-cloudflare \
-  --dns-cloudflare-credentials "${CERTIFY_ETC}/cloudflare/cloudflare.ini" \
-  --email "$CERTIFY_EMAIL" \
-  --agree-tos \
-  --dns-cloudflare-propagation-seconds 30 \
-  --non-interactive \
-  --force-renewal \
-  "${args[@]}"
+if [[ -d "${CERTIFY_ETC}/letsencrypt/live/${cert_name}" ]]; then
+  certbot -v certonly \
+    --config-dir "${CERTIFY_ETC}/letsencrypt" \
+    --dns-cloudflare \
+    --dns-cloudflare-credentials "${CERTIFY_ETC}/cloudflare/cloudflare.ini" \
+    --email "$CERTIFY_EMAIL" \
+    --agree-tos \
+    --dns-cloudflare-propagation-seconds 30 \
+    --non-interactive \
+    --force-renewal \
+    --cert-name "$cert_name" \
+    --expand \
+    "${args[@]}"
+else
+  certbot -v certonly \
+    --config-dir "${CERTIFY_ETC}/letsencrypt" \
+    --dns-cloudflare \
+    --dns-cloudflare-credentials "${CERTIFY_ETC}/cloudflare/cloudflare.ini" \
+    --email "$CERTIFY_EMAIL" \
+    --agree-tos \
+    --dns-cloudflare-propagation-seconds 30 \
+    --non-interactive \
+    --force-renewal \
+    --cert-name "$cert_name" \
+    "${args[@]}"
+fi
+
+
+#
+# >:[-/-]:<
+#
