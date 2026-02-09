@@ -13,12 +13,6 @@ export $(shell sed 's/=.*//' .env)
 
 
 #
-#	dns[s]
-#
-$(shell test -f .dns || cp .dns.sample .dns)
-
-
-#
 #	target[s]
 #
 build:

@@ -2,9 +2,5 @@
 .env*
 !.env.sample
 
-# dns
-.dns*
-!.dns.sample
-
 # mnt
 mnt
