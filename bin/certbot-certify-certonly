@@ -14,17 +14,48 @@
 #   check[s]
 #
 [[ -z "$CERTIFY_CLOUDFLARE_API_TOKEN" ]] && echo "Error: CERTIFY_CLOUDFLARE_API_TOKEN environment variable is not set." && exit 1
-[[ -z "$CERTIFY_DOMAINS" ]] && echo "Error: CERTIFY_DOMAINS environment variable is not set." && exit 1
 [[ -z "$CERTIFY_EMAIL" ]] && echo "Error: CERTIFY_EMAIL environment variable is not set." && exit 1
 [[ -z "$CERTIFY_ETC" ]] && echo "Error: CERTIFY_ETC environment variable is not set." && exit 1
 
 
 #
-#   prepare arg[s] domains
+#   prepare arg[s] domains (from .dns file and/or CERTIFY_DOMAINS env)
 #
-IFS=',' read -r -a domain_array <<< "$CERTIFY_DOMAINS"
+declare -A domain_set
+domains=()
+
+if [[ -f ".dns" ]]; then
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    domain=$(echo "$line" | xargs)
+    if [[ -n "$domain" ]]; then
+      if [[ -z "${domain_set[$domain]:-}" ]]; then
+        domain_set[$domain]=1
+        domains+=("$domain")
+      fi
+    fi
+  done < ".dns"
+fi
+
+if [[ -n "${CERTIFY_DOMAINS:-}" ]]; then
+  IFS=',' read -r -a env_domains <<< "$CERTIFY_DOMAINS"
+  for domain in "${env_domains[@]}"; do
+    domain=$(echo "$domain" | xargs)
+    if [[ -n "$domain" ]]; then
+      if [[ -z "${domain_set[$domain]:-}" ]]; then
+        domain_set[$domain]=1
+        domains+=("$domain")
+      fi
+    fi
+  done
+fi
+
+if [[ ${#domains[@]} -eq 0 ]]; then
+  echo "Error: No domains found. Set CERTIFY_DOMAINS environment variable or create a .dns file with domain entries."
+  exit 1
+fi
+
 args=()
-for domain in "${domain_array[@]}"; do
+for domain in "${domains[@]}"; do
   args+=("-d" "$domain")
 done
 
