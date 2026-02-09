@@ -24,11 +24,14 @@ $(shell test -f .dns || cp .dns.sample .dns)
 build:
 	@docker-compose build
 
+certify:
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certify
+
 delete:
-	@docker exec -it --env-file .env services-certify certbot --config-dir "${CERTIFY_ETC}/letsencrypt" delete --cert-name "$(shell echo "${CERTIFY_DOMAINS}" | cut -d',' -f1)"
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certbot --config-dir "${CERTIFY_ETC}/letsencrypt" delete --cert-name "$(CERTIFY_CERT_NAME)"
 
 expand:
-	@docker exec -it --env-file .env services-certify certbot -v certonly \
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certbot -v certonly \
   	  --config-dir "${CERTIFY_ETC}/letsencrypt" \
   	  --dns-cloudflare \
   	  --dns-cloudflare-credentials "${CERTIFY_ETC}/cloudflare/cloudflare.ini" \
@@ -37,34 +40,36 @@ expand:
   	  --dns-cloudflare-propagation-seconds 30 \
   	  --non-interactive \
   	  --force-renewal \
-	  --cert-name yencken.link \
+	  --cert-name "$(CERTIFY_CERT_NAME)" \
   	  --expand \
   	  -d "${CERTIFY_DOMAINS}"
 
-issue:
-	@docker exec -it --env-file .env services-certify certbot-certify-certonly
+certify:
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certify
+
+issue: certify
 
 list:
-	@docker exec -it --env-file .env services-certify certbot --config-dir "${CERTIFY_ETC}/letsencrypt" certificates
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certbot --config-dir "${CERTIFY_ETC}/letsencrypt" certificates
 
 logs:
-	@docker exec -it --env-file .env services-certify tail -n 64 -f /var/log/letsencrypt/letsencrypt.log
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) tail -n 64 -f /var/log/letsencrypt/letsencrypt.log
 
 renew:
-	@docker exec -it --env-file .env services-certify certbot --config-dir "${CERTIFY_ETC}/letsencrypt" renew
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) certbot --config-dir "${CERTIFY_ETC}/letsencrypt" renew
 
 reset:
 	@make list
 	@echo
 	@read -p "Remove all files and folders at ${CERTIFY_ETC}/letsencrypt? [y/N] " ans && [ "$$ans" = "y" ] && echo "Confirmed." || (echo "Cancelled."; exit 1)
-	@docker exec -it --env-file .env services-certify rm -rf "${CERTIFY_ETC}/letsencrypt"
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) rm -rf "${CERTIFY_ETC}/letsencrypt"
 
 restart:
 	make stop
 	make start
 
 shell:
-	@docker exec -it --env-file .env services-certify bash
+	@docker exec -it --env-file .env $(CERTIFY_CONTAINER_NAME) bash
 
 start:
 	@docker-compose up -d --build

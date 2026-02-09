@@ -2,10 +2,10 @@ services:
 
   certify:
     build: .
-    container_name: services-certify
-    image: services/certify:${CERTIFY_VERSION:-latest}
-    hostname: ${CERTIFY_HOSTNAME:-services-certify}
-    restart: no
+    container_name: ${CERTIFY_CONTAINER_NAME:-certify}
+    image: ${CERTIFY_IMAGE:-certify}:${CERTIFY_VERSION:-latest}
+    hostname: ${CERTIFY_HOSTNAME:-certify}
+    restart: unless-stopped
     volumes:
       - ${CERTIFY_VOLUME_BIN:-./bin}:/usr/local/bin
-      - ${CERTIFY_VOLUME_ETC:-./volumes/etc/certify}:/etc/certify
+      - ${CERTIFY_VOLUME_ETC:-./mnt/etc/certify}:/etc/certify
