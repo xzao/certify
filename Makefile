@@ -15,6 +15,9 @@ export $(shell sed 's/=.*//' .env)
 #
 #	target[s]
 #
+%:
+    @:
+
 build:
 	@docker compose build
 
