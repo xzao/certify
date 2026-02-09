@@ -54,6 +54,11 @@ if [[ ${#domains[@]} -eq 0 ]]; then
   exit 1
 fi
 
+# save de-duplicated domain[s]
+mkdir -p "${CERTIFY_ETC}"
+printf "%s\n" "${domains[@]}" > "${CERTIFY_ETC}/domains"
+
+# prepare arg[s]
 args=()
 for domain in "${domains[@]}"; do
   args+=("-d" "$domain")
