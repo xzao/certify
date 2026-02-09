@@ -1,3 +1,6 @@
+# cursor
+.cursor
+
 # env
 .env*
 !.env.sample
