@@ -17,10 +17,14 @@ Copy `.env.sample` to `.env` and configure:
 cp .env.sample .env
 ```
 
-Required variables:
-- `CERTIFY_EMAIL` - email for Let's Encrypt notifications
-- `CERTIFY_CLOUDFLARE_API_TOKEN` - Cloudflare API token with DNS edit permissions
-- `CERTIFY_DOMAINS` - comma-separated list of domains (supports wildcards)
+Set required environmentals in `.env`:
+
+```env
+CERTIFY_CLOUDFLARE_API_TOKEN=ez******************
+CERTIFY_DOMAINS=example.com,*.example.com
+CERTIFY_EMAIL=first.last@example.com
+...
+```
 
 Start the container:
 
