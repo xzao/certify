@@ -34,12 +34,16 @@ make start
 
 ## Usage
 
-#### Make Issue
-
-Issue or expand certificates:
+Certify certificates:
 
 ```bash
 make certify
+```
+
+Renew certificates:
+
+```bash
+make renew
 ```
 
 Explore the `Makefile` for additiona targets:
